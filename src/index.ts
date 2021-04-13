@@ -16,23 +16,21 @@ const game = new Game(
 game.start();
 
 game.onGameOver = async(count: number) => {
-  let isConfirm = '';
   const alert = async (content: string) => swal(content, {
     buttons: ['不玩了', '再来一把!'],
     closeOnClickOutside: false,
   });
-  if (count < 10) {
-    isConfirm = await alert(`你只坚持了 ${count} 秒，有点弱诶 🥴`);
-  } else if (count < 20) {
-    isConfirm = await alert(`你坚持了 ${count} 秒，还算不错 🤓`);
-  } else if (count < 30) {
-    isConfirm = await alert(`你坚持了 ${count} 秒，强啊 🤠`);
-  } else if (count < 100) {
-    isConfirm = await alert(`你坚持了 ${count} 秒，你已经超神了！🥳`);
-  } else {
-    isConfirm = await alert('你丫的是开挂了吧？');
+  const TIPS = {
+    10: '有点弱诶 🥴',
+    20: '还算不错 🤓',
+    30: '强啊 🤠',
+    100: '你已经超神了！🥳'
   }
-  if (isConfirm) {
-    game.start();
-  }
+  let tipsText = count > 100 ? '你丫的是开挂了吧？' : (()=>{
+    for (var prop in TIPS) {
+      if(Number(prop)>count) return TIPS[prop];
+    }
+  })()
+
+  if (await alert(`你坚持了 ${count} 秒，` + tipsText)) game.start();
 };
