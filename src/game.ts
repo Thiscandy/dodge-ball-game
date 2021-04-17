@@ -1,6 +1,14 @@
 import BulletSprite from './sprite/BulletSprite';
-import { BackgroundColor, BulletRadiusRange, BulletCount, CountFont, PlayerHeight } from './config';
+import {
+  BackgroundColor,
+  BulletRadiusRange,
+  BulletCount,
+  CountFont,
+  PlayerHeight,
+  RectangleSize
+} from './config';
 import PlayerSprite from './sprite/PlayreSprite';
+import RectangleSprite from './sprite/RectangleSprite';
 
 export default class Game {
   private ctx!: CanvasRenderingContext2D;
@@ -8,8 +16,12 @@ export default class Game {
   private height: number;
   /** 游戏是否已开始 */
   private isStart: boolean = false;
+  /** 是否无敌 */
+  private invincible: boolean = false;
   /** 子弹列表 */
   private bullets: BulletSprite[] = [];
+  /** 矩形 */
+  private Rectangles: RectangleSprite[] = [];
   /** 玩家 */
   private player: PlayerSprite;
   /** 游戏进行的秒数 */
@@ -78,8 +90,10 @@ export default class Game {
   /** 结束游戏 */
   stop() {
     this.isStart = false;
+    this.invincible = false;
     this.player?.stopListener();
     this.bullets.length = 0;
+    this.Rectangles.length = 0;
   }
 
   /** 生成一个子弹 */
@@ -106,6 +120,26 @@ export default class Game {
     this.bullets.push(bullet);
   }
 
+  // 生成一个矩形
+  addNewRectangle() {
+    // 生成一个随机位置（随机从四个方向进入）
+    const { x, y } = [
+      { x: Math.random() * this.width, y: 2 },                // 上面
+      { x: Math.random() * this.width, y: this.height }, // 下面
+      { x: 2, y: Math.random() * this.height },               // 左边
+      { x: this.width, y: Math.random() * this.height }, // 右边
+    ][~~(Math.random() * 4)]
+
+    const Rectangle = new RectangleSprite(
+      this.ctx,
+      x,
+      y,
+      this.player,
+    )
+
+    this.Rectangles.push(Rectangle);
+  }
+
   /** 绘制游戏 */
   render() {
     // 每次绘制前都需要先清空画布
@@ -113,6 +147,7 @@ export default class Game {
     this.renderBackground();
     this.renderCount();
     this.bullets.forEach(bullet => bullet.render());
+    this.Rectangles.forEach(Rectangle => Rectangle.render());
     this.player.render();
   }
 
@@ -128,12 +163,31 @@ export default class Game {
     if (this.player.x > this.width - edge) this.player.x = this.width - edge;
     if (this.player.y > this.height - edge) this.player.y = this.height - edge;
 
+    this.Rectangles = this.Rectangles.filter(Rectangle => {
+      // 更新子弹位置
+      Rectangle.update();
+
+      // 判断子弹是否射中玩家
+      if (this.player.isCrashRectangle(Rectangle)) {
+        this.invincible = true;
+        return false;
+      }
+
+      // 如果飞出屏幕则将子弹销毁
+      return !(
+        Rectangle.x < -RectangleSize * 2 ||               // 飞出左边屏幕
+        Rectangle.x > this.width + (RectangleSize * 2) || // 飞出右边屏幕
+        Rectangle.y < -RectangleSize * 2 ||               // 飞出上边屏幕
+        Rectangle.y > this.height + (RectangleSize * 2)   // 飞出下边屏幕
+      );
+    });
+
     this.bullets = this.bullets.filter(bullet => {
       // 更新子弹位置
       bullet.update();
 
       // 判断子弹是否射中玩家
-      if (this.player.isCrash(bullet)) {
+      if (!this.invincible && this.player.isCrash(bullet)) {
         this.isStart = false;
       }
 
@@ -148,6 +202,8 @@ export default class Game {
 
     // 如果屏幕中的子弹数量低于设置的数量，则补全数量
     for (let i = this.bullets.length; i < BulletCount; i++) this.addNewBullet();
+    // 矩形可以无视碰撞
+    for (let i = this.Rectangles.length; i < 3; i++) this.addNewRectangle();
   }
 
   /** 绘制游戏背景 */

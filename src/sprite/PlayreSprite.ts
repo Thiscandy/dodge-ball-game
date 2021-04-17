@@ -9,6 +9,7 @@ import {
   JoystickBgcColor,
 } from '../config';
 import BulletSprite from './BulletSprite';
+import RectangleSprite from './RectangleSprite';
 import Sprite from './Sprite';
 
 /**
@@ -264,6 +265,15 @@ export default class PlayerSprite extends Sprite {
           break;
       }
     }
+  }
+
+  /** 判断是否碰到矩形 */
+  public isCrashRectangle(rectangle: RectangleSprite): boolean {
+    let isCrashRectangle = false;
+
+    // 判断矩形碰到三角形
+
+    return isCrashRectangle;
   }
 
   /** 判断子弹是否射中玩家 */
