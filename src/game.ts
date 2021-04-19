@@ -5,7 +5,9 @@ import {
   BulletCount,
   CountFont,
   PlayerHeight,
-  RectangleSize
+  RectangleSize,
+  RectangleCount,
+  RectangleInvincibleTime,
 } from './config';
 import PlayerSprite from './sprite/PlayreSprite';
 import RectangleSprite from './sprite/RectangleSprite';
@@ -168,8 +170,9 @@ export default class Game {
       Rectangle.update();
 
       // 判断子弹是否射中玩家
-      if (this.player.isCrashRectangle(Rectangle)) {
+      if (!this.invincible && this.player.isCrashRectangle(Rectangle)) {
         this.invincible = true;
+        setTimeout(()=>{ this.invincible = false }, RectangleInvincibleTime*1000);
         return false;
       }
 
@@ -203,7 +206,9 @@ export default class Game {
     // 如果屏幕中的子弹数量低于设置的数量，则补全数量
     for (let i = this.bullets.length; i < BulletCount; i++) this.addNewBullet();
     // 矩形可以无视碰撞
-    for (let i = this.Rectangles.length; i < 3; i++) this.addNewRectangle();
+    if (!this.invincible) {
+      for (let i = this.Rectangles.length; i < RectangleCount; i++) this.addNewRectangle();
+    }
   }
 
   /** 绘制游戏背景 */

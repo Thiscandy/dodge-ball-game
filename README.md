@@ -4,6 +4,6 @@
 
 公众号原创介绍地址：[https://mp.weixin.qq.com/s/BxrLSr0q9rzGjJp4beJ7Xw](https://mp.weixin.qq.com/s/BxrLSr0q9rzGjJp4beJ7Xw)
 
-tips: 加矩形无敌效果（延长菜的秒速hhh）
+tips: 加上了矩形（无敌效果3s）
 
 cp：原难度太难，自己改了下难度还行（菜啊喂~

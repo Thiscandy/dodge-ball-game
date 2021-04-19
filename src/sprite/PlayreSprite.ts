@@ -7,6 +7,7 @@ import {
   JoystickInnerRadius,
   JoystickInnerColor,
   JoystickBgcColor,
+  RectangleSize,
 } from '../config';
 import BulletSprite from './BulletSprite';
 import RectangleSprite from './RectangleSprite';
@@ -271,7 +272,21 @@ export default class PlayerSprite extends Sprite {
   public isCrashRectangle(rectangle: RectangleSprite): boolean {
     let isCrashRectangle = false;
 
-    // 判断矩形碰到三角形
+    // 判断矩形四个角碰到三角形
+    const angles = [
+      {x: rectangle.x, y: rectangle.y},
+      {x: rectangle.x + RectangleSize, y: rectangle.y},
+      {x: rectangle.x, y: rectangle.y + RectangleSize},
+      {x: rectangle.x + RectangleSize, y: rectangle.y + RectangleSize},
+    ];
+    this.ctx.save();
+    this.getPlayerPath();
+    for(let i=0;i<angles.length;i++){
+      if (!isCrashRectangle && this.ctx.isPointInPath(angles[i].x, angles[i].y)) {
+        isCrashRectangle = true
+      }
+    }
+    this.ctx.restore();
 
     return isCrashRectangle;
   }

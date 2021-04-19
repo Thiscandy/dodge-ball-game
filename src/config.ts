@@ -4,7 +4,11 @@
 /** 游戏背景颜色 */
 export const BackgroundColor = '#f3f3f3';
 /** 一个屏幕中子弹的数量 */
-export const BulletCount = 50;
+export const BulletCount = 30;
+/** 一个屏幕中矩形的数量 */
+export const RectangleCount = 1;
+/** 矩形无敌时间 */
+export const RectangleInvincibleTime = 3;
 /** 分数文本样式 */
 export const CountFont = '50px Georgia';
 /** 虚拟摇杆距离屏幕的距离 */
@@ -22,7 +26,7 @@ export const JoystickInnerRadius = 40;
  * 子弹相关配置
  * */
 /** 生成的子弹半径范围 */
-export const BulletRadiusRange = [16, 32];
+export const BulletRadiusRange = [8, 16];
 /** 生成的子弹颜色列表 */
 export const BulletColorList = ['#3da8f5', '#d71345', '#ffaf38', '#f7acbc', '#7b5d5f', '#f47920', '#f05b72'];
 /** 生成的子弹速度范围 */
@@ -50,6 +54,6 @@ export const RectangleSize = 30;
 /** 玩家颜色 */
 export const PlayerColor = '#232323';
 /** 玩家三角形的高 */
-export const PlayerHeight = 40;
+export const PlayerHeight = 30;
 /** 玩家每次移动的距离 */
 export const PlayerStep = 5;
