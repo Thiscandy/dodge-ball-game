@@ -7,10 +7,13 @@ import {
   PlayerHeight,
   RectangleSize,
   RectangleCount,
+  StarsCount,
+  starsSize,
   RectangleInvincibleTime,
 } from './config';
 import PlayerSprite from './sprite/PlayreSprite';
 import RectangleSprite from './sprite/RectangleSprite';
+import StarsSprite from './sprite/StarsSprite';
 
 export default class Game {
   private ctx!: CanvasRenderingContext2D;
@@ -20,10 +23,14 @@ export default class Game {
   private isStart: boolean = false;
   /** 是否无敌 */
   private invincible: boolean = false;
+  /** 是否缩小 */
+  private small: boolean = false;
   /** 子弹列表 */
   private bullets: BulletSprite[] = [];
   /** 矩形 */
   private Rectangles: RectangleSprite[] = [];
+  /** 星星 */
+  private Stars: StarsSprite[] = [];
   /** 玩家 */
   private player: PlayerSprite;
   /** 游戏进行的秒数 */
@@ -96,6 +103,7 @@ export default class Game {
     this.player?.stopListener();
     this.bullets.length = 0;
     this.Rectangles.length = 0;
+    this.Stars.length = 0;
   }
 
   /** 生成一个子弹 */
@@ -142,6 +150,26 @@ export default class Game {
     this.Rectangles.push(Rectangle);
   }
 
+  // 生成一个星星
+  addNewStars() {
+    // 生成一个随机位置（随机从四个方向进入）
+    const { x, y } = [
+      { x: Math.random() * this.width, y: 2 },                // 上面
+      { x: Math.random() * this.width, y: this.height }, // 下面
+      { x: 2, y: Math.random() * this.height },               // 左边
+      { x: this.width, y: Math.random() * this.height }, // 右边
+    ][~~(Math.random() * 4)]
+
+    const Stars = new StarsSprite(
+      this.ctx,
+      x,
+      y,
+      this.player,
+    )
+
+    this.Stars.push(Stars);
+  }
+
   /** 绘制游戏 */
   render() {
     // 每次绘制前都需要先清空画布
@@ -150,6 +178,7 @@ export default class Game {
     this.renderCount();
     this.bullets.forEach(bullet => bullet.render());
     this.Rectangles.forEach(Rectangle => Rectangle.render());
+    this.Stars.forEach(stars => stars.render());
     this.player.render();
   }
 
@@ -166,17 +195,17 @@ export default class Game {
     if (this.player.y > this.height - edge) this.player.y = this.height - edge;
 
     this.Rectangles = this.Rectangles.filter(Rectangle => {
-      // 更新子弹位置
+      // 更新矩形位置
       Rectangle.update();
 
-      // 判断子弹是否射中玩家
+      // 判断矩形是否射中玩家
       if (!this.invincible && this.player.isCrashRectangle(Rectangle)) {
         this.invincible = true;
         setTimeout(()=>{ this.invincible = false }, RectangleInvincibleTime*1000);
         return false;
       }
 
-      // 如果飞出屏幕则将子弹销毁
+      // 如果飞出屏幕则将矩形销毁
       return !(
         Rectangle.x < -RectangleSize * 2 ||               // 飞出左边屏幕
         Rectangle.x > this.width + (RectangleSize * 2) || // 飞出右边屏幕
@@ -203,11 +232,34 @@ export default class Game {
       );
     });
 
+    this.Stars = this.Stars.filter(stars=>{
+      // 更新星星位置
+      stars.update();
+
+      // 判断星星是否射中玩家
+      if (!this.invincible && this.player.isCrashStars(stars)) {
+        this.player.updateSizeBig();
+        return false;
+      }
+
+      // 如果飞出屏幕则将星星销毁
+      return !(
+        stars.x < -starsSize ||               // 飞出左边屏幕
+        stars.x > this.width + (starsSize) || // 飞出右边屏幕
+        stars.y < -starsSize ||               // 飞出上边屏幕
+        stars.y > this.height + (starsSize)   // 飞出下边屏幕
+      );
+    })
+
     // 如果屏幕中的子弹数量低于设置的数量，则补全数量
     for (let i = this.bullets.length; i < BulletCount; i++) this.addNewBullet();
     // 矩形可以无视碰撞
     if (!this.invincible) {
       for (let i = this.Rectangles.length; i < RectangleCount; i++) this.addNewRectangle();
+    }
+    // 星星变小
+    if (this.count%6==0 && !this.small) {
+      for (let i = this.Stars.length; i < StarsCount; i++) this.addNewStars();
     }
   }
 

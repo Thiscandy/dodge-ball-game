@@ -8,9 +8,11 @@ import {
   JoystickInnerColor,
   JoystickBgcColor,
   RectangleSize,
+  starsSize
 } from '../config';
 import BulletSprite from './BulletSprite';
 import RectangleSprite from './RectangleSprite';
+import starsSprite from './starsSprite';
 import Sprite from './Sprite';
 
 /**
@@ -35,6 +37,7 @@ export default class PlayerSprite extends Sprite {
   touchPos?: { x: number, y: number };
   /** 虚拟摇杆的位置 */
   joystickPos?: { x: number, y: number }
+  private height = PlayerHeight;
 
   constructor(
     ctx: CanvasRenderingContext2D,
@@ -198,7 +201,7 @@ export default class PlayerSprite extends Sprite {
 
   /** 得到三角形的三个角 */
   public getPlayerAngles(): { x: number, y: number }[] {
-    const d = PlayerHeight / 2;
+    const d = this.height / 2;
     return [
       { x: this.x, y: this.y - d },
       { x: this.x - Math.cos(Math.PI / 4) * d, y: this.y + Math.sin(Math.PI / 2) * d },
@@ -268,6 +271,14 @@ export default class PlayerSprite extends Sprite {
     }
   }
 
+  public updateSizeBig() {
+    this.height = this.height*1.2;
+  }
+
+  public updateSizeSmall() {
+    this.height = this.height*0.8;
+  }
+
   /** 判断是否碰到矩形 */
   public isCrashRectangle(rectangle: RectangleSprite): boolean {
     let isCrashRectangle = false;
@@ -289,6 +300,25 @@ export default class PlayerSprite extends Sprite {
     this.ctx.restore();
 
     return isCrashRectangle;
+  }
+
+  public isCrashStars(stars: starsSprite): boolean {
+    let isCrashStars = false;
+    const angles = [
+      {x: stars.x + starsSize, y: stars.y + starsSize},
+      {x: stars.x - starsSize, y: stars.y + starsSize},
+      {x: stars.x + starsSize, y: stars.y - starsSize},
+      {x: stars.x + starsSize, y: stars.y + starsSize},
+    ]
+    this.ctx.save();
+    this.getPlayerPath();
+    for(let i=0;i<angles.length;i++){
+      if (!isCrashStars && this.ctx.isPointInPath(angles[i].x, angles[i].y)) {
+        isCrashStars = true
+      }
+    }
+    this.ctx.restore();
+    return isCrashStars
   }
 
   /** 判断子弹是否射中玩家 */
